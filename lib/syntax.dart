@@ -111,10 +111,10 @@ class TypeDefinition {
     } else if (name == "List" && subtype == "DateTime") {
       return "$fieldKey = json['$key'].map((v) => DateTime.tryParse(v));";
     } else if (name == "DateTime") {
-      return "$fieldKey = DateTime.tryParse(json['$key']);";
+      return "if (json['$key'] != null) {\n\t\t\t$fieldKey = DateTime.tryParse(json['$key']);\n\t\t}";
     } else if (name == 'List') {
       // list of class
-      return "if (json['$key'] != null) {\n\t\t\t$fieldKey = new List<$subtype>();\n\t\t\tjson['$key'].forEach((v) { $fieldKey.add(new $subtype.fromJson(v)); });\n\t\t}";
+      return "if (json['$key'] != null) {\n\t\t\t$fieldKey = $subtype.listfromJson(json['$key']);\n\t\t}";
     } else {
       // class
       return "$fieldKey = json['$key'] != null ? ${_buildParseClass(jsonKey)} : null;";
@@ -316,11 +316,15 @@ class ClassDefinition {
     return sb.toString();
   }
 
+  String get _listFromJsonGenFunc {
+    return '\tstatic List<$name> listFromJson(List<dynamic> list) {\n\n\t\treturn list.map((json) => $name.fromJson(json)).toList();\n\n\t}';
+  }
+
   String toString() {
     if (privateFields) {
-      return 'class $name {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n\n$_listFromJsonGenFunc\n}\n';
     } else {
-      return 'class $name {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n\n$_listFromJsonGenFunc\n}\n';
     }
   }
 }

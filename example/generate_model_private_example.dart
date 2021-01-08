@@ -15,7 +15,10 @@ String _scriptPath() {
 
 main() {
   final classGenerator = new ModelGenerator('Sample', true);
-  final currentDirectory = dirname(_scriptPath());
+  var currentDirectory = dirname(_scriptPath());
+  if (currentDirectory.indexOf('/') == 0) {
+    currentDirectory = currentDirectory.substring(1);
+  }
   final filePath = normalize(join(currentDirectory, 'sample.json'));
   final jsonRawData = new File(filePath).readAsStringSync();
   DartCode dartCode = classGenerator.generateDartClasses(jsonRawData);
